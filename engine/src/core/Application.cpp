@@ -27,6 +27,8 @@ namespace Titan
 
         int fps = 0;
         double deltaTime = 0;
+        int totalFramesSinceASecondElapses = 0;
+        double totalDeltaTimePerSecond = 0.0f;
 
         while(isRunning)
         {
@@ -43,18 +45,20 @@ namespace Titan
                 // std::cout << "Fixed Update" << std::endl;
             }
 
-            double totalDeltaTimePerSecond = 0.0f;
-
             totalDeltaTimePerSecond += deltaTime;
 
             currentTimePointForFPS = std::chrono::high_resolution_clock::now();
 
-            if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTimePointForFPS - previousTimePointForFPS).count() >= 1000)
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTimePointForFPS - previousTimePointForFPS) >= std::chrono::seconds{1})
             {
-                fps = static_cast<int>( 1000.f / totalDeltaTimePerSecond);
+                fps = static_cast<int>(static_cast<double>(totalFramesSinceASecondElapses) / totalDeltaTimePerSecond * std::chrono::duration<double, std::milli>(1000).count());
+
+                totalFramesSinceASecondElapses = 0;
+                totalDeltaTimePerSecond = 0.0f;
 
                 previousTimePointForFPS = std::chrono::high_resolution_clock::now();
             }
+            ++totalFramesSinceASecondElapses;
         }
     }
 }
